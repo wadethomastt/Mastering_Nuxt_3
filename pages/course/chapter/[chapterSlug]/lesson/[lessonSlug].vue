@@ -30,13 +30,15 @@
 </template>
 
 <script setup>
-  const course = useCourse();
+  const course = await useCourse();
   const route = useRoute();
+  const { chapterSlug, lessonSlug } = route.params;
+  const lesson = await useLesson(chapterSlug, lessonSlug);
   definePageMeta({
     middleware: [
-      function ({ params }, from) {
-        const course = useCourse();
-        const chapter = course.chapters.find(
+      async function ({ params }, from) {
+        const course = await useCourse();
+        const chapter = course.value.chapters.find(
           (chapter) => chapter.slug === params.chapterSlug
         );
         if (!chapter) {
@@ -63,17 +65,12 @@
     ],
   });
   const chapter = computed(() => {
-    return course.chapters.find(
+    return course.value.chapters.find(
       (chapter) => chapter.slug === route.params.chapterSlug
     );
   });
-  const lesson = computed(() => {
-    return chapter.value.lessons.find(
-      (lesson) => lesson.slug === route.params.lessonSlug
-    );
-  });
   const title = computed(() => {
-    return `${lesson.value.title} - ${course.title}`;
+    return `${lesson.value.title} - ${course.value.title}`;
   });
   useHead({
     title,
